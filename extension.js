@@ -338,7 +338,7 @@ function shouldTrackDocument(document) {
   if (!autoTrackEnabled && !isTracking) {
     return false;
   }
-  
+
   const excludedProjects = config.get("excludedProjects", []);
   const excludedFiles = config.get("excludedFiles", []);
 
@@ -466,7 +466,9 @@ async function sendSession(session) {
     language_id: session.language.id,
     start_time: session.startTime.toISOString(),
     end_time: session.endTime.toISOString(),
-    duration: session.duration
+    duration: session.duration,
+    project_name: session.projectName,
+    file_path: session.filePath,
   };
 
   // Send the data to the API
@@ -510,10 +512,12 @@ async function sendOfflineSessions() {
       language_id: session.language.id,
       start_time: session.startTime,
       end_time: session.endTime,
-      duration: session.duration
+      duration: session.duration,
+      project_name: session.projectName,
+      file_path: session.filePath,
     }));
 
-    // Send the batch
+    // Send the batch - let apiService handle the grouping and optimization
     await apiService.sendBatchSessions(formattedSessions);
 
     // Remove successfully sent sessions

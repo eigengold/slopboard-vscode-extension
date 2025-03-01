@@ -1,15 +1,14 @@
 const axios = require("axios");
 const vscode = require("vscode");
 
-// Default base URL - should be configurable in a real implementation
-const BASE_URL = "http://localhost:3000/api";
-
 /**
  * @typedef {Object} SessionData
  * @property {number} language_id - The ID of the programming language
  * @property {string} start_time - ISO timestamp of session start
  * @property {string} end_time - ISO timestamp of session end
  * @property {number} duration - Duration in seconds
+ * @property {string} [project_name] - Optional project name
+ * @property {string} [file_path] - Optional file path
  */
 
 /**
@@ -17,8 +16,13 @@ const BASE_URL = "http://localhost:3000/api";
  */
 class ApiService {
   constructor() {
+    // Get API URL from configuration or use production default
+    this.baseUrl = vscode.workspace
+      .getConfiguration("slopboardTracker")
+      .get("apiUrl", "https://slopboard.dev/api");
+
     this.axiosInstance = axios.create({
-      baseURL: BASE_URL,
+      baseURL: this.baseUrl,
       timeout: 10000,
     });
 
@@ -100,6 +104,27 @@ class ApiService {
   }
 
   /**
+   * Get the API URL from configuration
+   * @returns {string} - The configured API URL
+   */
+  getApiUrl() {
+    return vscode.workspace
+      .getConfiguration("slopboardTracker")
+      .get("apiUrl", "https://slopboard.dev/api");
+  }
+
+  /**
+   * Update the base URL if it changes in configuration
+   */
+  updateBaseUrl() {
+    const newBaseUrl = this.getApiUrl();
+    if (newBaseUrl !== this.baseUrl) {
+      this.baseUrl = newBaseUrl;
+      this.axiosInstance.defaults.baseURL = this.baseUrl;
+    }
+  }
+
+  /**
    * Extract a user-friendly error message from the error response
    * @param {Object} errorData - The error response data
    * @returns {string} - A user-friendly error message
@@ -129,6 +154,9 @@ class ApiService {
    */
   async sendSession(sessionData) {
     try {
+      // Ensure we have the latest API URL
+      this.updateBaseUrl();
+
       console.log(
         "Sending session data:",
         JSON.stringify(sessionData, null, 2)
@@ -154,7 +182,10 @@ class ApiService {
    */
   async sendBatchSessions(sessions) {
     try {
-      // Group sessions by language to reduce payload size
+      // Ensure we have the latest API URL
+      this.updateBaseUrl();
+
+      // Group sessions by language and project to reduce payload size
       const groupedSessions = this.groupSessionsByLanguage(sessions);
 
       console.log(
@@ -196,6 +227,8 @@ class ApiService {
           start_time: weekStart.toISOString(),
           end_time: session.end_time,
           duration: 0,
+          project_name: session.project_name || "Unknown",
+          file_path: session.file_path || "",
         });
       }
 
@@ -238,6 +271,9 @@ class ApiService {
    */
   async validateApiKey(apiKey) {
     try {
+      // Ensure we have the latest API URL
+      this.updateBaseUrl();
+
       const response = await this.axiosInstance.get("/auth/validate", {
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -258,6 +294,9 @@ class ApiService {
    */
   async getLanguages() {
     try {
+      // Ensure we have the latest API URL
+      this.updateBaseUrl();
+
       const response = await this.axiosInstance.get("/languages");
       return response.data;
     } catch (error) {

@@ -4,11 +4,37 @@
   "description": "Track coding time across languages and projects",
   "icon": "images/Slop.png",
   "version": "0.1.0",
+  "publisher": "slopboard",
+  "author": {
+    "name": "eigengold"
+  },
+  "license": "MIT",
+  "homepage": "https://slopboard.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eigengold/slopboard-vscode-extension"
+  },
+  "bugs": {
+    "url": "https://github.com/eigengold/slopboard-vscode-extension/issues"
+  },
+  "galleryBanner": {
+    "color": "#087CFA",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.60.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Programming Languages",
+    "Visualization"
+  ],
+  "keywords": [
+    "time-tracking",
+    "productivity",
+    "analytics",
+    "statistics",
+    "coding"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -79,6 +105,11 @@
           "default": "",
           "description": "API Key for the Slopboard Tracker service"
         },
+        "slopboardTracker.apiUrl": {
+          "type": "string",
+          "default": "https://slopboard.dev/api",
+          "description": "API URL for the Slopboard Tracker service"
+        },
         "slopboardTracker.idleThreshold": {
           "type": "number",
           "default": 120,
@@ -131,7 +162,9 @@
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "node ./test/runTest.js"
+    "test": "node ./test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
   },
   "devDependencies": {
     "@types/vscode": "^1.60.0",
@@ -142,7 +175,8 @@
     "glob": "^7.1.7",
     "mocha": "^8.4.0",
     "typescript": "^4.3.2",
-    "vscode-test": "^1.5.2"
+    "vscode-test": "^1.5.2",
+    "vsce": "^2.15.0"
   },
   "dependencies": {
     "axios": "^0.21.1",
